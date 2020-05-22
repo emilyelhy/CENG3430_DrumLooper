@@ -27,6 +27,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "xil_printf.h"
 #include "demo.h"
 
 
@@ -255,7 +256,7 @@ int main(void)
 //			xil_printf("Current FILE: %s\r\n",fno.fname);
 			int temp = 0;
 			for(int j = 0; fno.fname[j] != 0 && filename[j] != 0; j++){
-//				printf("fno.fname[%d]: %c  file[%d]: %c\r\n",j,fno.fname[j],j, filename[j]);
+				xil_printf("fno.fname[%d]: %c  file[%d]: %c\r\n",j,fno.fname[j],j, filename[j]);
 				if(fno.fname[j] != filename[j]) temp = 1;
 			}
 			if(temp == 0){
@@ -270,7 +271,7 @@ int main(void)
 		}
 	}
 	f_closedir(&dir);
-	xil_printf("-------------SD Card Init DONE--------------\r\n");
+	xil_printf("------------SD Card Init SUCCESS------------\r\n");
 
     //main loop
 
@@ -428,7 +429,14 @@ int main(void)
     						filename[3] = 'a';
     						filename[4] = 'v';
     						filename[5] = '\0';
-    						xil_printf("\r\nPlaying: %s",filename);
+    						FIL file;
+    						FRESULT result = f_open(&file, filename, FA_READ);
+    						if(result != 0){
+    							xil_printf("[ERROR] Could not open %s\r\n",filename);
+    							return XST_FAILURE;
+    						}
+    						xil_printf("\r\nPlaying: %s\r\n",filename);
+    						playFileAtHp(filename);
     						break;
     					default:
     						break;
