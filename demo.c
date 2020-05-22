@@ -436,7 +436,8 @@ int main(void)
     							return XST_FAILURE;
     						}
     						xil_printf("\r\nPlaying: %s\r\n",filename);
-    						playFileAtHp(filename);
+    						int flag = playFileAtHp(filename);
+    						if(flag == XST_FAILURE) return XST_FAILURE;
     						break;
     					default:
     						break;
