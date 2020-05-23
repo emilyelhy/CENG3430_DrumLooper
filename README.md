@@ -14,3 +14,16 @@
 ### 21/05
 *Add "u32 SectorCount;" in line194 in xsdps.h in dma_audio_bsp   
 *Correct the library path in line89 in diskio.c in dma_audio_bsp   
+
+### 23/05
+*Current Correct Output:   
+[DEBUG] riff: RIFF, wave: WAVE   
+[SUCCESS] Read RIFF header in 8.wav   
+[DEBUG] fmt: fmt , fmtChunkSize: 16   
+[DEBUG] audioFormat: 1   
+[DEBUG] numOfChannel: 2   
+[DEBUG] trash: 44100 176400 4   
+[DEBUG] bitPerSample: 16   
+[SUCCESS] Read FMT header in 8.wav   
+[DEBUG] data: data, dataSize: 3571200   
+[SUCCESS] Read data block in 8.wav
