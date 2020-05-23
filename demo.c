@@ -256,7 +256,7 @@ int main(void)
 //			xil_printf("Current FILE: %s\r\n",fno.fname);
 			int temp = 0;
 			for(int j = 0; fno.fname[j] != 0 && filename[j] != 0; j++){
-				xil_printf("fno.fname[%d]: %c  file[%d]: %c\r\n",j,fno.fname[j],j, filename[j]);
+//				xil_printf("fno.fname[%d]: %c  file[%d]: %c\r\n",j,fno.fname[j],j, filename[j]);
 				if(fno.fname[j] != filename[j]) temp = 1;
 			}
 			if(temp == 0){
@@ -436,7 +436,7 @@ int main(void)
     							return XST_FAILURE;
     						}
     						xil_printf("\r\nPlaying: %s\r\n",filename);
-    						int flag = playFileAtHp(filename);
+    						int flag = playFileAtHp(filename, sAxiDma);
     						if(flag == XST_FAILURE) return XST_FAILURE;
     						break;
     					default:
