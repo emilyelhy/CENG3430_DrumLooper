@@ -62,6 +62,7 @@
 #include "../demo.h"
 #include "ff.h"
 #include <string.h>
+#include <stdint.h>
 
 /************************** Variable Definitions *****************************/
 
@@ -788,7 +789,7 @@ typedef struct {
 	u32 riffSize;
 	char wave[4];
 } headerWave_t;
-XStatus playFileAtHp(char* filename){
+XStatus playFileAtHp(char* filename, XAxiDma AxiDma){
 //	xil_printf("Entered playFileAtHp function\r\n");
 	FIL file;
 	FRESULT result = f_open(&file, filename, FA_READ);
@@ -796,21 +797,88 @@ XStatus playFileAtHp(char* filename){
 		xil_printf("[ERROR] Couldn't open %s file.\r\n",filename);
 		return XST_FAILURE;
 	}
-	char riff[4];
-	u32 temp;
-	UINT byte;
-	char wave[4];
-	result = f_read(&file, riff, sizeof(riff), &byte);
-	result = f_read(&file,(void*)temp, sizeof(temp),&byte);
-	result = f_read(&file, wave, sizeof(wave),&byte);
+	//Read riff header
+	char riff[5] = {0,0,0,0,0};
+	u32 temp = 0;
+	UINT byte = 0;
+	char wave[5] = {0,0,0,0,0};
+	result = f_read(&file, riff, 4, &byte);
+	result = f_read(&file,(void*)temp, 4,&byte);
+	result = f_read(&file, wave, 4,&byte);
 	if(result != 0){
-		xil_printf("[ERROR] Couldn't read header in %s.\r\n",filename);
+		xil_printf("[ERROR] Couldn't read RIFF header in %s.\r\n",filename);
 		return XST_FAILURE;
 	}
-	if(strncmp(riff,"RIFF",4) != 0 || strncmp(wave,"WAVE",4) != 0){
+	if((strncmp(riff,"RIFF",4) != 0 && strncmp(riff,"riff",4) != 0)|| (strncmp(wave,"WAVE",4) != 0 && strncmp(wave,"wave",4) != 0)){
 //		xil_printf("RIFF: %s, WAVE: %s\r\n",riff,wave);
-		xil_printf("[ERROR] Illegal content in header of %s.\r\n",filename);
+		xil_printf("[ERROR] Illegal content in RIFF header of %s.\r\n",filename);
 		return XST_FAILURE;
 	}
-	xil_printf("[SUCCESS] Read header in %s\r\n",filename);
+	xil_printf("[DEBUG] riff: %s, wave: %s\r\n",riff,wave);
+	xil_printf("[SUCCESS] Read RIFF header in %s\r\n",filename);
+
+	//Read fmt header
+	char fmt[5] = {0,0,0,0,0};
+	int fmtChunkSize[1] = {0};
+	result = f_read(&file, fmt, 4, &byte);
+	result = f_read(&file, fmtChunkSize, 4,&byte);
+	if(result != 0){
+		xil_printf("[ERROR] Couldn't read FMT header in %s.\r\n",filename);
+		return XST_FAILURE;
+	}
+	if((strncmp(fmt,"FMT ",4) != 0 && strncmp(fmt,"fmt ",4) != 0)|| fmtChunkSize[0] != 16){
+		xil_printf("[ERROR] Illegal content in FMT header of %s.\r\n",filename);
+		return XST_FAILURE;
+	}
+	xil_printf("[DEBUG] fmt: %s, fmtChunkSize: %d\r\n",fmt, fmtChunkSize[0]);
+	int audioFormat[1] = {0};
+	result = f_read(&file, audioFormat, 2, &byte);
+	if(audioFormat[0] != 1 || result != 0){
+		xil_printf("[ERROR] Audio format not supported or audio format for %s could not be read.\r\n",filename);
+		return XST_FAILURE;
+	}
+	xil_printf("[DEBUG] audioFormat: %d\r\n", audioFormat[0]);
+	int numOfChannel[1] = {0};
+	result = f_read(&file, numOfChannel, 2, &byte);
+	if(result != 0 || numOfChannel[0] != 2){
+		xil_printf("[ERROR] Mono file not supported or number of channel for %s could not be read.\r\n",filename);
+		return XST_FAILURE;
+	}
+	xil_printf("[DEBUG] numOfChannel: %d\r\n",numOfChannel[0]);
+	int trash[3] = {0,0,0};
+	result = f_read(&file, trash, 10, &byte);
+	if(result != 0){
+		xil_printf("[ERROR] Could not read some of the data in FMT header of %s.\r\n",filename);
+		return XST_FAILURE;
+	}
+	xil_printf("[DEBUG] trash: ");
+	for(int i = 0; i < 3; i++) xil_printf("%d ",trash[i]);
+	xil_printf("\r\n");
+	int bitPerSample[1] = {0};
+	result = f_read(&file, bitPerSample, 2, &byte);
+	if(result != 0 || bitPerSample[0] != 16){
+		xil_printf("[ERROR] Bits per Sample did not equal to 16 or could not be read in %s.\r\n",filename);
+		return XST_FAILURE;
+	}
+	xil_printf("[DEBUG] bitPerSample: %d\r\n",bitPerSample[0]);
+	xil_printf("[SUCCESS] Read FMT header in %s\r\n",filename);
+
+	//Read real audio data
+	char data[5] = {0,0,0,0,0};
+	result = f_read(&file, data, 4, &byte);
+	if(strncmp(data,"DATA",4) != 0 && strncmp(data,"data",4) != 0){
+		xil_printf("[ERROR] Illegal content in DATA block of %s.\r\n");
+		return XST_FAILURE;
+	}
+	long int dataSize[1] = {0};
+	result = f_read(&file, dataSize, 4, &byte);
+	if(result != 0){
+		xil_printf("[ERROR] Could not get data size in %s.\r\n",filename);
+		return XST_FAILURE;
+	}
+	xil_printf("[DEBUG] data: %s, dataSize: %d\r\n", data, dataSize[0]);
+	xil_printf("[SUCCESS] Read data block in %s\r\n",filename);
+
+	return XST_FAILURE;
+
 }
