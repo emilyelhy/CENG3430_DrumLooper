@@ -247,6 +247,6 @@ void fnSetLineInput();
 void fnSetLineOutput();
 void fnSetMicInput();
 void fnSetHpOutput();
-XStatus playFileAtHp(char* filename);
+XStatus playFileAtHp(char* filename, XAxiDma AxiDma);
 
 #endif /* AUDIO_H_ */
