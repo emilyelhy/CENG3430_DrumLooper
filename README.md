@@ -16,7 +16,7 @@
 *Correct the library path in line89 in diskio.c in dma_audio_bsp   
 
 ### 23/05
-*Current Correct Output:   
+*Current Correct Output (Base on 8.wav):   
 [DEBUG] riff: RIFF, wave: WAVE   
 [SUCCESS] Read RIFF header in 8.wav   
 [DEBUG] fmt: fmt , fmtChunkSize: 16   
