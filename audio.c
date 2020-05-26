@@ -784,11 +784,7 @@ void fnSetHpOutput()
 		xil_printf("\r\nOutput set to HeadPhones");
 	}
 }
-typedef struct {
-	char riff[4];
-	u32 riffSize;
-	char wave[4];
-} headerWave_t;
+
 XStatus playFileAtHp(char* filename, XAxiDma AxiDma){
 //	xil_printf("Entered playFileAtHp function\r\n");
 	FIL file;
@@ -814,7 +810,7 @@ XStatus playFileAtHp(char* filename, XAxiDma AxiDma){
 		xil_printf("[ERROR] Illegal content in RIFF header of %s.\r\n",filename);
 		return XST_FAILURE;
 	}
-	xil_printf("[DEBUG] riff: %s, wave: %s\r\n",riff,wave);
+	xil_printf("\r\n[DEBUG] riff: %s, wave: %s\r\n",riff,wave);
 	xil_printf("[SUCCESS] Read RIFF header in %s\r\n",filename);
 
 	//Read fmt header
@@ -877,8 +873,18 @@ XStatus playFileAtHp(char* filename, XAxiDma AxiDma){
 		return XST_FAILURE;
 	}
 	xil_printf("[DEBUG] data: %s, dataSize: %d\r\n", data, dataSize[0]);
+
+	u8 soundDataLeft[2] = {0,0};
+	u8 soundDataRight[2] = {0,0};
+
+	while(f_read(&file, soundDataLeft, 1, &byte) == 0){
+		f_read(&file, soundDataRight, 1, &byte);
+//		xil_printf("\r\n[DEBUG] soundDataLeft: %d, soundDataRight: %d\r\n", soundDataLeft[0],soundDataRight[0]);
+		fnAudioWriteToReg(R29_PLAYBACK_HEADPHONE_LEFT_VOLUME_CONTROL, soundDataLeft[0]);
+		fnAudioWriteToReg(R30_PLAYBACK_HEADPHONE_RIGHT_VOLUME_CONTROL, soundDataRight[0]);
+	}
 	xil_printf("[SUCCESS] Read data block in %s\r\n",filename);
 
-	return XST_FAILURE;
+	return XST_SUCCESS;
 
 }
