@@ -165,6 +165,7 @@ const ivt_t ivt[] = {
 ******************************************************************************/
 int main(void)
 {
+	int playFlag = 0;
 	int track = 1;
 	int Status;
 
@@ -337,89 +338,16 @@ int main(void)
 
     				switch(Demo.chBtn) {
     					case 'u':
-    						if (!Demo.fAudioRecord && !Demo.fAudioPlayback)
-    						{
-    							xil_printf("\r\nStart Recording...\r\n");
-    							fnSetMicInput();
-
-    							fnAudioRecord(sAxiDma,NR_AUDIO_SAMPLES);
-    							Demo.fAudioRecord = 1;
-    						}
-    						else
-    						{
-    							if (Demo.fAudioRecord)
-    							{
-    								xil_printf("\r\nStill Recording...\r\n");
-    							}
-    							else
-    							{
-    								xil_printf("\r\nStill Playing back...\r\n");
-    							}
-    						}
     						break;
     					case 'd':
-    						if (!Demo.fAudioRecord && !Demo.fAudioPlayback)
-    						{
-    							xil_printf("\r\nStart Playback...\r\n");
-    							fnSetHpOutput();
-    							fnAudioPlay(sAxiDma,NR_AUDIO_SAMPLES);
-    							Demo.fAudioPlayback = 1;
-    						}
-    						else
-    						{
-    							if (Demo.fAudioRecord)
-    							{
-    								xil_printf("\r\nStill Recording...\r\n");
-    							}
-    							else
-    							{
-    								xil_printf("\r\nStill Playing back...\r\n");
-    							}
-    						}
     						break;
     					case 'r':
     						if(track < 8) track = track + 1;
     						xil_printf("\r\nTrack: %d", track);
-    						if (!Demo.fAudioRecord && !Demo.fAudioPlayback)
-    						{
-    							xil_printf("\r\nStart Recording...\r\n");
-    							fnSetLineInput();
-    							fnAudioRecord(sAxiDma,NR_AUDIO_SAMPLES);
-    							Demo.fAudioRecord = 1;
-    						}
-    						else
-    						{
-    							if (Demo.fAudioRecord)
-    							{
-    								xil_printf("\r\nStill Recording...\r\n");
-    							}
-    							else
-    							{
-    								xil_printf("\r\nStill Playing back...\r\n");
-    							}
-    						}
     						break;
     					case 'l':
     						if(track > 1) track = track - 1;
     						xil_printf("\r\nTrack: %d", track);
-    						if (!Demo.fAudioRecord && !Demo.fAudioPlayback)
-    						{
-    							xil_printf("\r\nStart Playback...");
-    							fnSetLineOutput();
-    							fnAudioPlay(sAxiDma,NR_AUDIO_SAMPLES);
-    							Demo.fAudioPlayback = 1;
-    						}
-    						else
-    						{
-    							if (Demo.fAudioRecord)
-    							{
-    								xil_printf("\r\nStill Recording...\r\n");
-    							}
-    							else
-    							{
-    								xil_printf("\r\nStill Playing back...\r\n");
-    							}
-    						}
     						break;
     					case 'c': ;
     						char filename[6];
@@ -436,6 +364,8 @@ int main(void)
     							return XST_FAILURE;
     						}
     						xil_printf("\r\nPlaying: %s\r\n",filename);
+    						playFlag = 1;
+    						fnSetHpOutput();
     						int flag = playFileAtHp(filename, sAxiDma);
     						if(flag == XST_FAILURE) return XST_FAILURE;
     						break;
